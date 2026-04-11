@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLoginMutation } from '../hooks/useAuth';
-import { Typography } from '../components/Typography';
-import { Input } from '../components/Input';
-import { Button } from '../components/Button';
+import { useLoginMutation } from '../../hooks/useAuth';
+import { Typography } from '../../components/Typography';
+import { Input } from '../../components/Input';
+import { Button } from '../../components/Button';
 
 export const Login = () => {
   const navigate = useNavigate();

@@ -1,16 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useVerifyOtpMutation } from '../hooks/useAuth';
-import { Typography } from '../components/Typography';
-import { Button } from '../components/Button';
+import { useVerifyOtpMutation, useResendOtpMutation } from '../../hooks/useAuth';
+import { Typography } from '../../components/Typography';
+import { Button } from '../../components/Button';
 
 export const OTP = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const tempToken = searchParams.get('tempToken');
 
   const [otp, setOtp] = useState(new Array(6).fill(''));
   const [formError, setFormError] = useState(null);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState(null);
   const inputRefs = useRef([]);
 
   useEffect(() => {
@@ -33,20 +35,77 @@ export const OTP = () => {
     },
   });
 
-  const handleChange = (element, index) => {
-    if (isNaN(element.value)) return false;
+  const resendMutation = useResendOtpMutation({
+    onSuccess: (data) => {
+      setResendError(null);
+      setResendSuccess(true);
+      if (data?.tempToken) {
+        setSearchParams({ tempToken: data.tempToken }, { replace: true });
+      }
+      setTimeout(() => setResendSuccess(false), 5000);
+    },
+    onError: (error) => {
+      setResendError(error.response?.data?.message || 'Failed to resend code');
+    },
+  });
 
-    setOtp([...otp.map((d, idx) => (index === idx ? element.value : d))]);
+  const handleResend = (e) => {
+    e.preventDefault();
+    if (tempToken && !resendMutation.isPending) {
+      setResendError(null);
+      resendMutation.mutate(tempToken);
+    }
+  };
+
+  const handleChange = (element, index) => {
+    let value = element.value;
+    if (isNaN(value)) value = value.replace(/\D/g, ''); // strip non-numeric
+
+    // If user typed/pasted multiple characters (e.g. autofill)
+    if (value.length > 1) {
+      const splitValue = value.split('').slice(0, 6);
+      const newOtp = [...otp];
+      splitValue.forEach((char, idx) => {
+        if (index + idx < 6) newOtp[index + idx] = char;
+      });
+      setOtp(newOtp);
+
+      const nextFocus = Math.min(index + splitValue.length, 5);
+      if (inputRefs.current[nextFocus]) {
+        inputRefs.current[nextFocus].focus();
+      }
+      return;
+    }
+
+    setOtp([...otp.map((d, idx) => (index === idx ? value : d))]);
 
     // Focus next input
-    if (element.nextSibling && element.value !== '') {
-      element.nextSibling.focus();
+    if (value !== '' && inputRefs.current[index + 1]) {
+      inputRefs.current[index + 1].focus();
     }
   };
 
   const handleKeyDown = (e, index) => {
     if (e.key === 'Backspace' && e.target.value === '' && e.target.previousSibling) {
       e.target.previousSibling.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6).split('');
+    if (pastedData.length > 0) {
+      const newOtp = [...otp];
+      pastedData.forEach((char, idx) => {
+        if (idx < 6) newOtp[idx] = char;
+      });
+      setOtp(newOtp);
+
+      // Focus the last filled input or the first empty one
+      const focusIndex = pastedData.length < 6 ? pastedData.length : 5;
+      if (inputRefs.current[focusIndex]) {
+        inputRefs.current[focusIndex].focus();
+      }
     }
   };
 
@@ -90,18 +149,19 @@ export const OTP = () => {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-8 flex flex-col items-center">
-        <div className="flex space-x-3 justify-between w-full max-w-sm mb-4">
+        <div className="flex gap-1.5 sm:gap-3 md:gap-4 justify-center w-full px-2 mb-4">
           {otp.map((data, index) => {
             return (
               <input
-                className="w-12 h-14 md:w-14 md:h-16 text-center text-xl font-semibold bg-surface-container-high outline-none rounded focus:bg-surface-container-lowest focus:border-b-2 focus:border-primary transition-all"
+                className="w-10 h-12 sm:w-12 sm:h-14 md:w-14 md:h-16 text-center text-lg sm:text-xl font-semibold bg-surface-container-high outline-none rounded focus:bg-surface-container-lowest focus:border-b-2 focus:border-primary transition-all flex-shrink-0"
                 type="text"
                 name="otp"
-                maxLength="1"
+                maxLength="6"
                 key={index}
                 value={data}
                 onChange={(e) => handleChange(e.target, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
+                onPaste={handlePaste}
                 onFocus={(e) => e.target.select()}
                 ref={(el) => (inputRefs.current[index] = el)}
               />
@@ -120,29 +180,49 @@ export const OTP = () => {
       </form>
 
       <div className="mt-8 text-center space-y-4 flex flex-col items-center">
-        <button className="text-secondary font-semibold text-sm hover:text-primary flex items-center cursor-pointer">
-          <svg
-            className="w-4 h-4 mr-2"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
+        {resendError && (
+          <div className="text-red-500 font-medium text-sm text-center">{resendError}</div>
+        )}
+        {resendSuccess ? (
+          <span className="text-green-500 font-medium text-sm flex items-center">
+            <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            Code resent successfully!
+          </span>
+        ) : (
+          <button
+            type="button"
+            onClick={handleResend}
+            disabled={resendMutation.isPending}
+            className={`text-secondary font-semibold text-sm flex items-center ${
+              resendMutation.isPending
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:text-primary cursor-pointer'
+            }`}
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          Resend Code
-        </button>
-        <button
-          onClick={() => navigate('/login')}
-          className="text-secondary text-xs hover:underline cursor-pointer"
-        >
-          Change verification method
-        </button>
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            {resendMutation.isPending ? 'Resending...' : 'Resend Code'}
+          </button>
+        )}
       </div>
     </div>
   );

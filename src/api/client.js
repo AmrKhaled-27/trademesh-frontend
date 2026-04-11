@@ -2,7 +2,7 @@
  * Base URL for all backend requests.
  * @constant {string}
  */
-export const BASE_URL = 'http://localhost:3000/api';
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
  * Validates and handles common HTTP application errors.
@@ -14,7 +14,10 @@ export const BASE_URL = 'http://localhost:3000/api';
 export const handleResponse = async (response) => {
   if (response.status === 401) {
     localStorage.removeItem('token');
-    window.location.href = '/login';
+    // Don't redirect if we're already on an auth page, so we can show validation logic like "Invalid OTP/Credentials"
+    if (!['/login', '/signup', '/otp'].includes(window.location.pathname)) {
+      window.location.href = '/login';
+    }
   }
 
   const data = await response.json().catch(() => ({}));

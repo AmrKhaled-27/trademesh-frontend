@@ -1,7 +1,6 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Typography } from '../components/Typography';
-import { Button } from '../components/Button';
+import { Typography } from '../../components/Typography';
+import { Button } from '../../components/Button';
 
 export const Home = () => {
   const navigate = useNavigate();

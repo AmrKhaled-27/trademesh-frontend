@@ -12,7 +12,7 @@ export const AuthLayout = () => {
     <>
       <Navbar isAuthBlock={true} />
       <div className="min-h-screen bg-surface flex flex-col justify-center items-center p-4 pt-24">
-        <div className="w-full max-w-md bg-surface-container-lowest p-8 md:p-10 rounded-md shadow-ambient">
+        <div className="w-full max-w-[31rem] bg-surface-container-lowest p-8 md:p-10 rounded-md shadow-ambient">
           <Outlet />
         </div>
       </div>
