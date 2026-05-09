@@ -1,6 +1,6 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
-import { LayoutDashboard, Archive, TrendingUp, ShoppingCart, Settings } from 'lucide-react';
+import { Archive, Wallet, History, TrendingUp, Key } from 'lucide-react';
 import { Typography } from '../components/Typography';
 
 /**
@@ -10,11 +10,11 @@ import { Typography } from '../components/Typography';
  */
 export const StudioLayout = () => {
   const navItems = [
-    { name: 'Dashboard', path: '/studio/dashboard', icon: LayoutDashboard },
     { name: 'Inventory', path: '/studio/inventory', icon: Archive },
+    { name: 'Wallet', path: '/studio/wallet', icon: Wallet },
+    { name: 'Transactions', path: '/studio/transactions', icon: History },
     { name: 'Analytics', path: '/studio/analytics', icon: TrendingUp },
-    { name: 'Orders', path: '/studio/orders', icon: ShoppingCart },
-    { name: 'Settings', path: '/studio/settings', icon: Settings },
+    { name: 'API Key', path: '/studio/api-key', icon: Key },
   ];
 
   return (

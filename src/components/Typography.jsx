@@ -24,8 +24,7 @@ export const Typography = ({ variant = 'body', component, className = '', childr
   };
 
   const Component =
-    component ||
-    (variant.startsWith('display') || variant.startsWith('h') ? variant.split('-')[0] : 'p');
+    component || (variant.startsWith('display') ? 'h1' : variant.startsWith('h') ? variant : 'p');
 
   return (
     <Component className={`${baseStyle} ${variants[variant] || ''} ${className}`} {...props}>

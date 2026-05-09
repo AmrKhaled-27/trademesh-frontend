@@ -6,11 +6,11 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { OTP } from './pages/OTP';
 import { Home } from './pages/Home/';
-import { Dashboard } from './pages/studio/dashboard';
+import { Wallet } from './pages/studio/wallet';
 import { Inventory } from './pages/studio/inventory';
 import { Analytics } from './pages/studio/analytics';
-import { Orders } from './pages/studio/orders';
-import { Settings } from './pages/studio/settings';
+import { Transactions } from './pages/studio/transactions';
+import { APIKey } from './pages/studio/api-key';
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -49,12 +49,12 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/studio/dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          <Route index element={<Navigate to="/studio/inventory" replace />} />
+          <Route path="wallet" element={<Wallet />} />
           <Route path="inventory" element={<Inventory />} />
           <Route path="analytics" element={<Analytics />} />
-          <Route path="orders" element={<Orders />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="transactions" element={<Transactions />} />
+          <Route path="api-key" element={<APIKey />} />
         </Route>
       </Routes>
     </Router>
