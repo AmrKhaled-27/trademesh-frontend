@@ -58,7 +58,9 @@ export const Navbar = ({ isAuthBlock = false }) => {
               Wallet Balance
             </Typography>
             <Typography variant="body-md" className="font-display font-bold text-primary">
-              $2,450.00
+              {isLoading
+                ? '$---'
+                : `$${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
             </Typography>
           </div>
           <div className="w-px h-8 bg-surface-container-low mx-4 hidden md:block"></div>

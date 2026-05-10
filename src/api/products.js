@@ -49,4 +49,21 @@ export const productsApi = {
       method: 'DELETE',
     });
   },
+  /**
+   * Fetches all products with optional filters.
+   * @param {Object} filters - Search and brand filters.
+   * @returns {Promise<Array>}
+   */
+  getAllProducts: async (filters = {}) => {
+    const params = new URLSearchParams();
+    if (filters.name) params.append('name', filters.name);
+    if (filters.brand) params.append('brand', filters.brand);
+
+    const queryString = params.toString();
+    const endpoint = queryString ? `/products?${queryString}` : '/products';
+
+    return apiClient(endpoint, {
+      method: 'GET',
+    });
+  },
 };

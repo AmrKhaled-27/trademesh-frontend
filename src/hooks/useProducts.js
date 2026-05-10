@@ -54,3 +54,13 @@ export const useDeleteProductMutation = (options = {}) => {
     ...options,
   });
 };
+/**
+ * Query hook to fetch all products with filters.
+ */
+export const useProductsQuery = (filters = {}, options = {}) => {
+  return useQuery({
+    queryKey: ['products', filters],
+    queryFn: () => productsApi.getAllProducts(filters),
+    ...options,
+  });
+};
