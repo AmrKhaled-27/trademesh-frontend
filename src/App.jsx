@@ -8,11 +8,9 @@ import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { OTP } from './pages/OTP';
 
-import { Home } from './pages/Home/';
-
 import { Market } from './pages/market';
 import { ProductDetails } from './pages/product-details';
-
+import Home from './pages/home/index';
 import { Wallet } from './pages/studio/wallet';
 import { Inventory } from './pages/studio/inventory';
 import { Analytics } from './pages/studio/analytics';
