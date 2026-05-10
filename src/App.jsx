@@ -5,7 +5,7 @@ import { StudioLayout } from './layouts/StudioLayout';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { OTP } from './pages/OTP';
-import { Home } from './pages/Home/';
+import Home from './pages/home/index';
 import { Wallet } from './pages/studio/wallet';
 import { Inventory } from './pages/studio/inventory';
 import { Analytics } from './pages/studio/analytics';
