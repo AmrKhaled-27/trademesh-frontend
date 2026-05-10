@@ -64,3 +64,15 @@ export const useProductsQuery = (filters = {}, options = {}) => {
     ...options,
   });
 };
+
+/**
+ * Query hook to fetch a single product's details.
+ */
+export const useProductDetailsQuery = (id, options = {}) => {
+  return useQuery({
+    queryKey: ['product', id],
+    queryFn: () => productsApi.getProductById(id),
+    enabled: !!id,
+    ...options,
+  });
+};

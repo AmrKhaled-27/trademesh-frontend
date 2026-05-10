@@ -1,14 +1,10 @@
 ﻿import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
 import { AuthLayout } from './layouts/AuthLayout';
 import { MainLayout } from './layouts/MainLayout';
 import { StudioLayout } from './layouts/StudioLayout';
-
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { OTP } from './pages/OTP';
-
-import { Market } from './pages/market';
 import { ProductDetails } from './pages/product-details';
 import Home from './pages/home/index';
 import { Wallet } from './pages/studio/wallet';
@@ -47,7 +43,7 @@ function App() {
           }
         >
           <Route path="/" element={<Home />} />
-          <Route path="/market" element={<Market />} />
+          <Route path="/market" element={<Home />} />
 
           {/* PRODUCT DETAILS */}
           <Route path="/products/:id" element={<ProductDetails />} />

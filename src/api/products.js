@@ -66,4 +66,14 @@ export const productsApi = {
       method: 'GET',
     });
   },
+  /**
+   * Fetches a single product by ID.
+   * @param {string|number} id
+   * @returns {Promise<Object>}
+   */
+  getProductById: async (id) => {
+    return apiClient(`/products/${id}`, {
+      method: 'GET',
+    });
+  },
 };
