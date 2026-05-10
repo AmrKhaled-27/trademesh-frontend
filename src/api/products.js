@@ -56,7 +56,7 @@ export const productsApi = {
    */
   getAllProducts: async (filters = {}) => {
     const params = new URLSearchParams();
-    if (filters.name) params.append('name', filters.name);
+    if (filters.search) params.append('search', filters.search);
     if (filters.brand) params.append('brand', filters.brand);
 
     const queryString = params.toString();

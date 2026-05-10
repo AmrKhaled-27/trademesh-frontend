@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Search, Loader, AlertCircle, TrendingUp } from 'lucide-react';
 import ProductCard from '../../components/ProductCard';
 import { Typography } from '../../components/Typography';
@@ -8,19 +8,18 @@ import { useProductsQuery } from '../../hooks/useProducts';
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [brandFilter, setBrandFilter] = useState('');
+  const [activeFilters, setActiveFilters] = useState({ search: '', brand: '' });
 
-  const {
-    data: products = [],
-    isLoading: loading,
-    error,
-  } = useProductsQuery({
-    name: searchQuery,
-    brand: brandFilter,
-  });
+  const { data, isLoading: loading, error } = useProductsQuery(activeFilters);
 
   const handleDiscovery = () => {
-    console.log('Discovery clicked');
+    setActiveFilters({
+      search: searchQuery,
+      brand: brandFilter,
+    });
   };
+
+  const products = data?.data?.products || [];
 
   return (
     <div className="w-full min-h-screen bg-white text-zinc-900 flex flex-col overflow-x-hidden">
@@ -132,6 +131,7 @@ export default function Home() {
                 onClick={() => {
                   setSearchQuery('');
                   setBrandFilter('');
+                  setActiveFilters({ search: '', brand: '' });
                 }}
                 className="mt-2 text-sm !font-medium !text-[#10b981] hover:!text-[#059669] transition-colors !bg-[#10b981]/10 hover:!bg-[#10b981]/20 px-6 py-2.5 rounded-full"
               >
