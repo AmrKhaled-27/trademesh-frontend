@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useProductDetailsQuery } from '../../hooks/useProducts';
+import { useCurrentUserQuery } from '../../hooks/useUser';
 import { ChevronLeft, AlertCircle } from 'lucide-react';
 import { CheckoutModal } from '../../components/CheckoutModal';
 
@@ -9,11 +10,13 @@ export const ProductDetails = () => {
   const navigate = useNavigate();
 
   const { data, isLoading, error } = useProductDetailsQuery(id);
+  const { data: userData } = useCurrentUserQuery();
 
   const [selectedImage, setSelectedImage] = useState(null);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
   const product = data?.data?.product;
+  const isOwner = product?.ownerId === userData?.data?.user?.id;
 
   useEffect(() => {
     if (product) {
@@ -165,10 +168,21 @@ export const ProductDetails = () => {
             <div className="flex flex-col gap-2.5">
               <button
                 onClick={() => setIsCheckoutModalOpen(true)}
-                className="w-full bg-gradient-to-br from-[#006c49] to-[#10b981] text-white py-[15px] px-6 rounded-lg font-bold text-[15px] shadow-[0_4px_14px_rgba(0,108,73,0.25)] hover:brightness-105 active:scale-[0.99] transition-all font-display tracking-[0.2px] cursor-pointer"
+                disabled={isOwner}
+                className={`w-full py-[15px] px-6 rounded-lg font-bold text-[15px] transition-all font-display tracking-[0.2px] ${
+                  isOwner
+                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed border border-gray-300'
+                    : 'bg-gradient-to-br from-[#006c49] to-[#10b981] text-white shadow-[0_4px_14px_rgba(0,108,73,0.25)] hover:brightness-105 active:scale-[0.99] cursor-pointer'
+                }`}
               >
-                Buy Now · $
-                {Number(product.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                {isOwner ? (
+                  'You cannot buy your own product'
+                ) : (
+                  <>
+                    Buy Now · $
+                    {Number(product.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </>
+                )}
               </button>
 
               <button

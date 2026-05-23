@@ -28,6 +28,20 @@ export const useCreateProductMutation = (options = {}) => {
 };
 
 /**
+ * Mutation hook for bulk uploading products.
+ */
+export const useBulkUploadMutation = (options = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: productsApi.bulkUploadProducts,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myProducts'] });
+    },
+    ...options,
+  });
+};
+
+/**
  * Mutation hook to update a product.
  */
 export const useUpdateProductMutation = (options = {}) => {

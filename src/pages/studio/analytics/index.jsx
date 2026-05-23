@@ -13,12 +13,14 @@ import {
 
 import {
   ResponsiveContainer,
-  LineChart,
+  ComposedChart,
   Line,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
+  Legend,
 } from 'recharts';
 
 export const Analytics = () => {
@@ -42,8 +44,39 @@ export const Analytics = () => {
 
       if (signal && signal.aborted) return;
 
+      const rawData = chartRes?.data?.chartData || [];
+
+      // Create a map of existing data for quick lookup
+      const dataMap = rawData.reduce((acc, curr) => {
+        acc[curr.date] = curr;
+        return acc;
+      }, {});
+
+      const filledData = [];
+      let runningProfit = 0;
+
+      // Generate dates for the selected timeframe and fill gaps
+      for (let i = days - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setHours(0, 0, 0, 0);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+
+        const dayData = dataMap[dateStr] || { revenue: 0, expenses: 0 };
+        const profit = (dayData.revenue || 0) - (dayData.expenses || 0);
+        runningProfit += profit;
+
+        filledData.push({
+          date: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(d),
+          revenue: dayData.revenue || 0,
+          expenses: dayData.expenses || 0,
+          profit,
+          cumulativeProfit: runningProfit,
+        });
+      }
+
       setSummary(summaryRes?.data?.summary);
-      setChartData(chartRes?.data?.chartData || []);
+      setChartData(filledData);
       setTopProducts(topProductsRes?.data?.topProducts || []);
     } catch (err) {
       console.error(err);
@@ -179,7 +212,10 @@ export const Analytics = () => {
           <div className="h-80 w-full">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                <ComposedChart
+                  data={chartData}
+                  margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
                   <XAxis
                     dataKey="date"
@@ -187,28 +223,68 @@ export const Analytics = () => {
                     fontSize={12}
                     tickLine={false}
                     axisLine={false}
+                    minTickGap={30}
                   />
-                  <YAxis stroke="#9ca3af" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip />
-                  <Line
-                    type="monotone"
+                  <YAxis
+                    yAxisId="left"
+                    stroke="#9ca3af"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    stroke="#9ca3af"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    hide={days > 30}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#fff',
+                      borderRadius: '12px',
+                      border: 'none',
+                      boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                      padding: '12px',
+                    }}
+                    itemStyle={{ padding: '2px 0' }}
+                    formatter={(value, name) => [`$${value.toLocaleString()}`, name]}
+                  />
+                  <Legend
+                    verticalAlign="top"
+                    align="right"
+                    iconType="circle"
+                    wrapperStyle={{ paddingBottom: '20px' }}
+                  />
+                  <Bar
+                    yAxisId="left"
                     dataKey="revenue"
-                    name="Revenue"
-                    stroke="#3b82f6"
-                    strokeWidth={2}
-                    dot={false}
-                    activeDot={{ r: 6 }}
+                    name="Daily Revenue"
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                    barSize={20}
+                  />
+                  <Bar
+                    yAxisId="left"
+                    dataKey="expenses"
+                    name="Daily Expenses"
+                    fill="#ef4444"
+                    radius={[4, 4, 0, 0]}
+                    barSize={20}
                   />
                   <Line
+                    yAxisId="right"
                     type="monotone"
-                    dataKey="expenses"
-                    name="Expenses"
-                    stroke="#ef4444"
-                    strokeWidth={2}
-                    dot={false}
+                    dataKey="cumulativeProfit"
+                    name="Total Growth (Cumulative)"
+                    stroke="#10b981"
+                    strokeWidth={3}
+                    dot={days <= 30}
                     activeDot={{ r: 6 }}
                   />
-                </LineChart>
+                </ComposedChart>
               </ResponsiveContainer>
             ) : (
               <div className="h-full flex items-center justify-center text-gray-400 text-sm">

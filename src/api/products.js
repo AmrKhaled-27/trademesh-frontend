@@ -49,6 +49,22 @@ export const productsApi = {
       method: 'DELETE',
     });
   },
+
+  /**
+   * Bulk uploads products via CSV file.
+   * @param {File} file - CSV file containing product data.
+   * @returns {Promise<any>}
+   */
+  bulkUploadProducts: async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return apiClient('/products/bulk', {
+      method: 'POST',
+      body: formData,
+    });
+  },
+
   /**
    * Fetches all products with optional filters.
    * @param {Object} filters - Search and brand filters.

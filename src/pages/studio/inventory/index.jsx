@@ -9,6 +9,7 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  useBulkUploadMutation,
 } from '../../../hooks/useProducts';
 import { useCurrentUserQuery } from '../../../hooks/useUser';
 import { uploadToCloudinary } from '../../../api/cloudinary';
@@ -22,6 +23,7 @@ import {
   Loader2,
   ShoppingBag,
   CheckCircle2,
+  Upload,
 } from 'lucide-react';
 
 export const Inventory = () => {
@@ -31,7 +33,9 @@ export const Inventory = () => {
   const createMutation = useCreateProductMutation();
   const updateMutation = useUpdateProductMutation();
   const deleteMutation = useDeleteProductMutation();
+  const bulkUploadMutation = useBulkUploadMutation();
 
+  const fileInputRef = React.useRef(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -151,6 +155,27 @@ export const Inventory = () => {
     ) {
       deleteMutation.mutate(id);
     }
+  };
+
+  const handleBulkUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      alert('Please select a CSV file.');
+      return;
+    }
+
+    bulkUploadMutation.mutate(file, {
+      onSuccess: (data) => {
+        alert(`${data.message || 'Products uploaded successfully!'}`);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      },
+      onError: (err) => {
+        alert(`Bulk upload failed: ${err.message}`);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      },
+    });
   };
 
   const products = productsData?.data?.products || [];
@@ -277,13 +302,35 @@ export const Inventory = () => {
             listings, and track your history.
           </Typography>
         </div>
-        <Button
-          onClick={() => openModal()}
-          className="flex items-center gap-2 px-8 py-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
-        >
-          <Plus size={20} strokeWidth={3} />
-          Add Product
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleBulkUpload}
+            accept=".csv"
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-2 px-6 py-4"
+            disabled={bulkUploadMutation.isPending}
+          >
+            {bulkUploadMutation.isPending ? (
+              <Loader2 size={20} className="animate-spin" />
+            ) : (
+              <Upload size={20} />
+            )}
+            Bulk Upload
+          </Button>
+          <Button
+            onClick={() => openModal()}
+            className="flex items-center gap-2 px-8 py-4 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
+          >
+            <Plus size={20} strokeWidth={3} />
+            Add Product
+          </Button>
+        </div>
       </div>
 
       {/* Main Stats / Overview could go here */}
