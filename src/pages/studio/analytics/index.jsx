@@ -56,11 +56,17 @@ export const Analytics = () => {
       let runningProfit = 0;
 
       // Generate dates for the selected timeframe and fill gaps
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
       for (let i = days - 1; i >= 0; i--) {
-        const d = new Date();
-        d.setHours(0, 0, 0, 0);
+        const d = new Date(today);
         d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
 
         const dayData = dataMap[dateStr] || { revenue: 0, expenses: 0 };
         const profit = (dayData.revenue || 0) - (dayData.expenses || 0);
